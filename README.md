@@ -1,47 +1,30 @@
 # NextUp
 
-A macOS menu bar app that shows your next meeting and how long until it starts.
+**Your next meeting, always one glance away.** NextUp is a small macOS menu bar app that shows what's coming up and how long you have, with a one-click Join for Meet, Zoom and Teams.
 
-<p>
-  <img src="docs/popover-light.png" width="320" alt="NextUp popover, light mode">
-  <img src="docs/popover-dark.png" width="320" alt="NextUp popover, dark mode">
-  <img src="docs/popover-retro.png" width="320" alt="NextUp popover, Retro mode">
+<p align="center">
+  <img src="docs/popover-light.png" width="260" alt="NextUp popover in Classic mode, light appearance">
+  <img src="docs/popover-dark.png" width="260" alt="NextUp popover in Classic mode, dark appearance">
+  <img src="docs/popover-retro.png" width="260" alt="NextUp popover in Retro mode, with a neon synthwave backdrop">
 </p>
 
-![Menu bar label](docs/menubar.png)
+<p align="center">
+  <img src="docs/menubar.png" alt="Menu bar label reading: Design review · in 30 min">
+</p>
 
-The screenshots use made-up demo meetings.
+<p align="center"><sub>Screenshots use made-up demo meetings.</sub></p>
 
-## What it does
+## Highlights
 
-The menu bar shows a calendar icon and, when there is something to show, the next meeting's title with a countdown:
+- **A countdown in the menu bar.** `Design review · in 30 min`, then `12 min left` once it starts.
+- **One-click Join.** Google Meet, Zoom and Microsoft Teams links are found in the event's URL, location or notes.
+- **The rest of your day at a glance**, topped up from the next days when today is quiet.
+- **Two looks.** Classic follows your Mac's light or dark appearance. Retro is full synthwave: neon grid, striped sunset, glowing countdown.
+- **Private by design.** It reads your calendar on your Mac through EventKit. No network code, no accounts, no files written.
 
-- `Design review · in 30 min` before a meeting starts
-- `Sprint planning · 12 min left` while one is running
-- `... · now` in the last minute before a start
-- Just the icon when nothing else is left today, or when calendar access is missing
+## Quick start
 
-If a meeting starts within 10 minutes, it takes over the label from the one in progress. Titles longer than 22 characters are cut short.
-
-Click the label to open the popover. It has a card for the current or next meeting (time range, countdown, progress bar while it runs, and a Join button if a link was found), then a list of what is coming up. Clicking a row with a video link opens the link.
-
-The list shows every meeting left today. If that is fewer than 4, it is topped up from the following days to reach 4. Events within the next 7 days are considered. These are hidden: all-day events, cancelled events, and events you declined.
-
-## Modes
-
-The selector at the bottom of the popover switches between two looks, and NextUp remembers your choice:
-
-- **Classic** follows the system's light or dark appearance.
-- **Retro** is a synthwave look: a night-purple sky, a striped sun on a neon grid, a glowing countdown and a magenta-to-cyan progress bar. It is always dark. With Increase Contrast turned on, the backdrop is dimmed.
-
-Join links are picked out of an event's URL, location and notes. Google Meet, Zoom and Microsoft Teams links are recognised.
-
-## Requirements
-
-- macOS 14 or later
-- Xcode command line tools (Swift 5.9 or later)
-
-## Install
+You need macOS 14 or later and the Xcode command line tools (Swift 5.9+).
 
 ```sh
 git clone https://github.com/alexissan/NextUp.git
@@ -49,51 +32,95 @@ cd NextUp
 ./build.sh
 ```
 
-The script builds a release binary, wraps it in `NextUp.app`, signs it ad hoc, copies it to `/Applications` (replacing any earlier copy, and quitting a running one first), and launches it.
+`build.sh` builds a release binary, wraps it in `NextUp.app`, signs it ad hoc, installs it in `/Applications` (quitting and replacing any earlier copy), and launches it.
 
-## First run
+When macOS asks, allow calendar access. NextUp sees whatever the Calendar app sees, so add Google or Outlook accounts in **System Settings → Internet Accounts** first.
 
-Allow calendar access when macOS asks. NextUp reads whatever the Calendar app can see, so Google or Outlook calendars need their account added in System Settings → Internet Accounts first.
-
-## Try it without calendar access
+Want a look before granting access? Demo mode skips the calendar and invents meetings around the current time:
 
 ```sh
 open -a NextUp --args --demo
 ```
 
-This skips the calendar completely and shows invented meetings positioned around the current time.
+## How it works
 
-## Privacy
+### The menu bar label
 
-NextUp reads your calendars on your Mac through EventKit. The code has no networking and writes no files of its own. Opening a Join link hands the URL to your default browser or app. The "Launch at login" checkbox registers a login item with macOS.
+| Situation | Label |
+|---|---|
+| A meeting is coming up | `Design review · in 30 min` |
+| A meeting is running | `Sprint planning · 12 min left` |
+| Less than a minute to go | `Design review · now` |
+| Nothing left today, or no calendar access | the calendar icon alone |
+
+A meeting starting within 10 minutes takes over the label from one still in progress, so you never miss the next one. Titles longer than 22 characters are shortened.
+
+### The popover
+
+Click the label to open it:
+
+- **Hero card** for the current or next meeting: time range, countdown, a progress bar while it runs, and **Join** when a video link was found.
+- **Coming up**, grouped by day. Rows with a video icon open their call when clicked.
+- **Mode selector** (Classic or Retro), remembered across launches.
+- **Launch at login**, **Open Calendar** and **Quit**.
+
+The list shows every meeting left today. If that's fewer than 4, it's topped up from the following days, looking up to 7 days ahead. All-day events, cancelled events and events you declined are left out. Everything refreshes every 30 seconds, when your calendar changes, and when your Mac wakes.
+
+### Modes
+
+| | Classic | Retro |
+|---|---|---|
+| Appearance | follows the system, light or dark | always dark |
+| Backdrop | system material | night-purple sky, stars, striped sun on a neon grid |
+| Countdown | rounded, semibold | heavy monospaced, cyan-to-magenta glow |
+| Accents | system accent colour | magenta, violet and cyan |
+
+Your calendar colours are kept in both modes, because they carry meaning. Retro dims its backdrop when **Increase Contrast** is turned on.
+
+### Accessibility
+
+Meeting rows read as one element, and rows with a call are announced as buttons with a hint. Day headers are marked as headings. The progress bar reports its percentage, and the decorative Retro backdrop is hidden from VoiceOver.
+
+## Troubleshooting
+
+**No meetings show up.** Check that NextUp is allowed in **System Settings → Privacy & Security → Calendars**, and that the calendar shows up in the Calendar app.
+
+**macOS asks for calendar access again after a rebuild.** The app is ad-hoc signed, so every build has a new signature. Allow it again. If the prompt never comes back, reset the permission and relaunch:
+
+```sh
+tccutil reset Calendar dev.alexissantos.nextup
+```
+
+**A call link isn't detected.** Only Meet, Zoom and Teams links are recognised for now. The link must be in the event's URL, location or notes.
 
 ## Uninstall
 
-Quit NextUp from its popover, then delete `/Applications/NextUp.app`.
-
-## Known limits
-
-- The app is ad-hoc signed, so there is no prebuilt download. You build it yourself.
-- macOS may ask for calendar access again after a rebuild, because the signature changes.
-- There is no app icon yet.
+Quit NextUp from its popover, turn off **Launch at login** if you enabled it, then delete `/Applications/NextUp.app`.
 
 ## Development
 
 ```sh
 swift test
+swift run NextUp --demo
 ```
 
-- `Sources/NextUpCore` has the pure logic: which meetings are shown, the labels and countdowns, join link detection, and the stored `Theme`. This is what the tests cover.
-- `Sources/NextUp` is the SwiftUI app: `CalendarStore` (EventKit), `PopoverView`, `Palette` (the per-mode styling and the Retro backdrop), `DemoData`, and the menu bar entry point.
-- `swift run NextUp --render-screenshots docs` regenerates the images in `docs/`.
-- `build.sh` builds and installs the app bundle. `Resources/Info.plist` is its manifest.
+| Path | What's there |
+|---|---|
+| `Sources/NextUpCore` | Pure logic, covered by the tests: which meetings show, labels and countdowns, join-link detection, the stored `Theme` |
+| `Sources/NextUp` | The SwiftUI app: `CalendarStore` (EventKit), `PopoverView`, `Palette` (per-mode styling and the Retro backdrop), `DemoData`, and the menu bar entry point |
+| `Resources/Info.plist` | The app bundle's manifest |
+| `build.sh` | Builds, signs and installs the app |
 
-The README images are regenerated from demo data, without touching the screen or your calendar:
+The images in `docs/` are rendered offscreen from demo data, without touching the screen or your calendar:
 
 ```sh
-swift build -c release
-.build/release/NextUp --render-screenshots docs
+swift run NextUp --render-screenshots docs
 ```
+
+## Known limits
+
+- No prebuilt download yet: the app is ad-hoc signed, so you build it yourself.
+- No app icon yet.
 
 ## Licence
 
