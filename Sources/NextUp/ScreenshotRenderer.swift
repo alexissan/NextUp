@@ -17,9 +17,18 @@ enum ScreenshotRenderer {
         NSApp.setActivationPolicy(.accessory)
 
         let store = CalendarStore(demoProvider: DemoData.meetings(now:))
-        for (name, appearance) in [("popover-light", NSAppearance.Name.aqua), ("popover-dark", .darkAqua)] {
+        let suite = "dev.alexissantos.nextup.screenshots"
+        let defaults = UserDefaults(suiteName: suite) ?? .standard
+        defer { UserDefaults.standard.removePersistentDomain(forName: suite) }
+        let shots: [(String, NSAppearance.Name, Theme)] = [
+            ("popover-light", .aqua, .classic),
+            ("popover-dark", .darkAqua, .classic),
+            ("popover-retro", .darkAqua, .retro),
+        ]
+        for (name, appearance, theme) in shots {
             let dark = appearance == .darkAqua
-            let view = PopoverView(store: store)
+            defaults.set(theme.rawValue, forKey: Theme.storageKey)
+            let view = PopoverView(store: store, defaults: defaults)
                 .background(Color(nsColor: dark ? NSColor(white: 0.16, alpha: 1) : NSColor(white: 0.96, alpha: 1)))
                 .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
                 .overlay(RoundedRectangle(cornerRadius: 12, style: .continuous).strokeBorder(Color.primary.opacity(0.15), lineWidth: 0.5))

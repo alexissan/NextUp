@@ -5,6 +5,7 @@ A macOS menu bar app that shows your next meeting and how long until it starts.
 <p>
   <img src="docs/popover-light.png" width="320" alt="NextUp popover, light mode">
   <img src="docs/popover-dark.png" width="320" alt="NextUp popover, dark mode">
+  <img src="docs/popover-retro.png" width="320" alt="NextUp popover, Retro mode">
 </p>
 
 ![Menu bar label](docs/menubar.png)
@@ -25,6 +26,13 @@ If a meeting starts within 10 minutes, it takes over the label from the one in p
 Click the label to open the popover. It has a card for the current or next meeting (time range, countdown, progress bar while it runs, and a Join button if a link was found), then a list of what is coming up. Clicking a row with a video link opens the link.
 
 The list shows every meeting left today. If that is fewer than 4, it is topped up from the following days to reach 4. Events within the next 7 days are considered. These are hidden: all-day events, cancelled events, and events you declined.
+
+## Modes
+
+The selector at the bottom of the popover switches between two looks, and NextUp remembers your choice:
+
+- **Classic** follows the system's light or dark appearance.
+- **Retro** is a synthwave look: a night-purple sky, a striped sun on a neon grid, a glowing countdown and a magenta-to-cyan progress bar. It is always dark. With Increase Contrast turned on, the backdrop is dimmed.
 
 Join links are picked out of an event's URL, location and notes. Google Meet, Zoom and Microsoft Teams links are recognised.
 
@@ -75,8 +83,9 @@ Quit NextUp from its popover, then delete `/Applications/NextUp.app`.
 swift test
 ```
 
-- `Sources/NextUpCore` has the pure logic: which meetings are shown, the labels and countdowns, join link detection. This is what the tests cover.
-- `Sources/NextUp` is the SwiftUI app: `CalendarStore` (EventKit), `PopoverView`, `DemoData`, and the menu bar entry point.
+- `Sources/NextUpCore` has the pure logic: which meetings are shown, the labels and countdowns, join link detection, and the stored `Theme`. This is what the tests cover.
+- `Sources/NextUp` is the SwiftUI app: `CalendarStore` (EventKit), `PopoverView`, `Palette` (the per-mode styling and the Retro backdrop), `DemoData`, and the menu bar entry point.
+- `swift run NextUp --render-screenshots docs` regenerates the images in `docs/`.
 - `build.sh` builds and installs the app bundle. `Resources/Info.plist` is its manifest.
 
 The README images are regenerated from demo data, without touching the screen or your calendar:
