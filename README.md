@@ -32,7 +32,7 @@ cd NextUp
 ./build.sh
 ```
 
-`build.sh` builds a release binary, wraps it in `NextUp.app`, signs it ad hoc, installs it in `/Applications` (quitting and replacing any earlier copy), and launches it.
+`build.sh` builds a release binary, wraps it in `NextUp.app`, signs it (ad hoc, unless you have made a local certificate), installs it in `/Applications` (quitting and replacing any earlier copy), and launches it.
 
 When macOS asks, allow calendar access. NextUp sees whatever the Calendar app sees, so add Google or Outlook accounts in **System Settings → Internet Accounts** first.
 
@@ -85,11 +85,15 @@ Meeting rows read as one element, and rows with a call are announced as buttons 
 
 **No meetings show up.** Check that NextUp is allowed in **System Settings → Privacy & Security → Calendars**, and that the calendar shows up in the Calendar app.
 
-**macOS asks for calendar access again after a rebuild.** The app is ad-hoc signed, so every build has a new signature. Allow it again. If the prompt never comes back, reset the permission and relaunch:
+**macOS asks for calendar access again after a rebuild.** By default the app is ad-hoc signed, so the permission belongs to one exact build. When `build.sh` installs a build the old permission no longer covers, it clears it so macOS asks again. To stop this happening, run `./make-signing-cert.sh` once before `./build.sh`: it creates a self-signed certificate called "NextUp Local Signing" in your login keychain, `build.sh` signs with it from then on, and the permission follows the certificate instead of one exact build. To undo it, delete the certificate in Keychain Access.
+
+**NextUp is allowed under Calendars, but no meetings show.** The switch belongs to an earlier build. Clear it and relaunch:
 
 ```sh
 tccutil reset Calendar dev.alexissantos.nextup
 ```
+
+**The label is missing from the menu bar.** NextUp is still running; macOS hides menu bar items that don't fit beside the notch, and the label is wide. Remove or hide another menu bar icon to make room.
 
 **A call link isn't detected.** Only Meet, Zoom and Teams links are recognised for now. The link must be in the event's URL, location or notes.
 
