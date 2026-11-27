@@ -16,7 +16,7 @@ enum ScreenshotRenderer {
         _ = NSApplication.shared
         NSApp.setActivationPolicy(.accessory)
 
-        let store = CalendarStore(demoProvider: DemoData.meetings(now:))
+        let store = CalendarStore(demoProvider: { DemoData.meetings(now: $0) })
         let suite = "dev.alexissantos.nextup.screenshots"
         let defaults = UserDefaults(suiteName: suite) ?? .standard
         defer { UserDefaults.standard.removePersistentDomain(forName: suite) }
@@ -32,6 +32,31 @@ enum ScreenshotRenderer {
                 .background(Color(nsColor: dark ? NSColor(white: 0.16, alpha: 1) : NSColor(white: 0.96, alpha: 1)))
                 .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
                 .overlay(RoundedRectangle(cornerRadius: 12, style: .continuous).strokeBorder(Color.primary.opacity(0.15), lineWidth: 0.5))
+                .padding(20)
+                .environment(\.colorScheme, dark ? .dark : .light)
+                .environment(\.controlActiveState, .key)
+            write(view, appearance: appearance, to: dir.appendingPathComponent("\(name).png"))
+        }
+
+        let bannerStart = Date().addingTimeInterval(3600)
+        let bannerMeeting = Meeting(
+            id: "banner-shot",
+            title: "Design review",
+            start: bannerStart,
+            end: bannerStart.addingTimeInterval(45 * 60),
+            color: RGB(r: 0.6, g: 0.4, b: 0.85),
+            joinURL: URL(string: "https://zoom.us/j/123456789")
+        )
+        let bannerShots: [(String, NSAppearance.Name, Theme)] = [
+            ("banner-light", .aqua, .classic),
+            ("banner-dark", .darkAqua, .classic),
+            ("banner-retro", .darkAqua, .retro),
+        ]
+        for (name, appearance, theme) in bannerShots {
+            let dark = appearance == .darkAqua
+            let backing = Color(nsColor: dark ? NSColor(white: 0.16, alpha: 1) : NSColor(white: 0.96, alpha: 1))
+            let view = BannerView(meetings: [bannerMeeting], now: bannerStart.addingTimeInterval(-45), theme: theme, onJoin: { _ in }, onDismiss: {})
+                .background(backing, in: RoundedRectangle(cornerRadius: 18, style: .continuous))
                 .padding(20)
                 .environment(\.colorScheme, dark ? .dark : .light)
                 .environment(\.controlActiveState, .key)

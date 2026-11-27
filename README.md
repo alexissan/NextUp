@@ -9,6 +9,11 @@
 </p>
 
 <p align="center">
+  <img src="docs/banner-light.png" width="420" alt="The banner in Classic mode: Design review, in 45 s, with a Join button">
+  <img src="docs/banner-retro.png" width="420" alt="The banner in Retro mode, with a neon synthwave backdrop">
+</p>
+
+<p align="center">
   <img src="docs/menubar.png" alt="Menu bar label reading: Design review · in 30 min">
 </p>
 
@@ -17,6 +22,7 @@
 ## Highlights
 
 - **A countdown in the menu bar.** `Design review · in 30 min`, then `12 min left` once it starts.
+- **A banner you can't miss.** One minute before a meeting, a big banner drops in at the top of your screen with the title, a live countdown and Join.
 - **One-click Join.** Google Meet, Zoom and Microsoft Teams links are found in the event's URL, location or notes.
 - **The rest of your day at a glance**, topped up from the next days when today is quiet.
 - **Two looks.** Classic follows your Mac's light or dark appearance. Retro is full synthwave: neon grid, striped sunset, glowing countdown.
@@ -42,6 +48,12 @@ Want a look before granting access? Demo mode skips the calendar and invents mee
 open -a NextUp --args --demo
 ```
 
+To see the banner too, use `--demo-banner`. It runs demo mode and adds a meeting that starts about a minute after launch, so the banner shows about 5 seconds in:
+
+```sh
+open -a NextUp --args --demo-banner
+```
+
 ## How it works
 
 ### The menu bar label
@@ -62,9 +74,22 @@ Click the label to open it:
 - **Hero card** for the current or next meeting: time range, countdown, a progress bar while it runs, and **Join** when a video link was found.
 - **Coming up**, grouped by day. Rows with a video icon open their call when clicked.
 - **Mode selector** (Classic or Retro), remembered across launches.
-- **Launch at login**, **Open Calendar** and **Quit**.
+- **Launch at login** and **Banner before meetings**, two checkboxes.
+- **Open Calendar** and **Quit**.
 
 The list shows every meeting left today. If that's fewer than 4, it's topped up from the following days, looking up to 7 days ahead. All-day events, cancelled events and events you declined are left out. Everything refreshes every 30 seconds, when your calendar changes, and when your Mac wakes.
+
+### The banner
+
+One minute before a meeting starts, a banner appears at the top of the screen you're using. It shows over full-screen apps and never takes keyboard focus, so whatever you're typing keeps going.
+
+- It shows the title, the time range, a live countdown and **Join** when a video link was found.
+- It goes away when you press **Dismiss**, when you press **Join**, or one minute after the meeting starts.
+- Each meeting gets one banner. If you move a meeting, it gets a banner again at its new time.
+- Two meetings at the same time share one banner, with a row each.
+- If your Mac wakes up to 2 minutes into a meeting, the banner still shows.
+
+Turn it off with **Banner before meetings** in the popover.
 
 ### Modes
 
@@ -80,6 +105,8 @@ Your calendar colours are kept in both modes, because they carry meaning. Retro 
 ### Accessibility
 
 Meeting rows read as one element, and rows with a call are announced as buttons with a hint. Day headers are marked as headings. The progress bar reports its percentage, and the decorative Retro backdrop is hidden from VoiceOver.
+
+VoiceOver announces the banner when it appears, and each banner row reads as one element, like "Design review, starts in 45 seconds". With **Reduce Motion** on, the banner fades in instead of sliding down. With **Increase Contrast** on, Classic gets an opaque background and a stronger border.
 
 ## Troubleshooting
 
@@ -110,8 +137,8 @@ swift run NextUp --demo
 
 | Path | What's there |
 |---|---|
-| `Sources/NextUpCore` | Pure logic, covered by the tests: which meetings show, labels and countdowns, join-link detection, the stored `Theme` |
-| `Sources/NextUp` | The SwiftUI app: `CalendarStore` (EventKit), `PopoverView`, `Palette` (per-mode styling and the Retro backdrop), `DemoData`, and the menu bar entry point |
+| `Sources/NextUpCore` | Pure logic, covered by the tests: which meetings show, when the banner is due, labels and countdowns, join-link detection, the stored `Theme` |
+| `Sources/NextUp` | The SwiftUI app: `CalendarStore` (EventKit), `PopoverView`, `BannerController`, `BannerPanel` and `BannerView` (the banner), `Palette` (per-mode styling and the Retro backdrop), `DemoData`, and the menu bar entry point |
 | `Resources/Info.plist` | The app bundle's manifest |
 | `build.sh` | Builds, signs and installs the app |
 

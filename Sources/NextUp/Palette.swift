@@ -32,6 +32,16 @@ struct Palette {
             : .system(size: 28, weight: .semibold, design: .rounded)
     }
 
+    var bannerTitleFont: Font {
+        isRetro ? .system(size: 24, weight: .heavy) : .system(size: 26, weight: .semibold)
+    }
+
+    var bannerCountdownFont: Font {
+        isRetro
+            ? .system(size: 34, weight: .heavy, design: .monospaced)
+            : .system(size: 34, weight: .semibold, design: .rounded)
+    }
+
     var countdownStyle: AnyShapeStyle {
         isRetro
             ? AnyShapeStyle(LinearGradient(colors: [Neon.cyan, Neon.lavender, Neon.magenta], startPoint: .leading, endPoint: .trailing))

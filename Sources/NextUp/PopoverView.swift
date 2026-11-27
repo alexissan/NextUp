@@ -2,17 +2,17 @@ import SwiftUI
 import ServiceManagement
 import NextUpCore
 
-private extension RGB {
+extension RGB {
     var color: Color { Color(.sRGB, red: r, green: g, blue: b) }
 }
 
-private let timeFormat: Date.FormatStyle = .dateTime.hour().minute()
+let timeFormat: Date.FormatStyle = .dateTime.hour().minute()
 
-private func timeRange(_ m: Meeting) -> String {
+func timeRange(_ m: Meeting) -> String {
     "\(m.start.formatted(timeFormat)) – \(m.end.formatted(timeFormat))"
 }
 
-private func open(_ url: URL) {
+func open(_ url: URL) {
     NSWorkspace.shared.open(url)
 }
 
@@ -29,11 +29,13 @@ struct PopoverView: View {
     @ObservedObject var store: CalendarStore
     @AppStorage private var theme: Theme
     @Environment(\.colorScheme) private var systemScheme
+    @AppStorage private var bannerEnabled: Bool
     @State private var launchAtLogin = SMAppService.mainApp.status == .enabled
 
     init(store: CalendarStore, defaults: UserDefaults = .standard) {
         self.store = store
         _theme = AppStorage(wrappedValue: .classic, Theme.storageKey, store: defaults)
+        _bannerEnabled = AppStorage(wrappedValue: true, BannerSchedule.storageKey, store: defaults)
     }
 
     private var palette: Palette { Palette(theme: theme) }
@@ -117,26 +119,31 @@ struct PopoverView: View {
     }
 
     private var footer: some View {
-        HStack(spacing: 10) {
-            Toggle("Launch at login", isOn: Binding(
-                get: { launchAtLogin },
-                set: { newValue in
-                    do {
-                        if newValue { try SMAppService.mainApp.register() } else { try SMAppService.mainApp.unregister() }
-                    } catch {}
-                    launchAtLogin = SMAppService.mainApp.status == .enabled
-                }
-            ))
+        VStack(alignment: .leading, spacing: 6) {
+            HStack(spacing: 12) {
+                Toggle("Launch at login", isOn: Binding(
+                    get: { launchAtLogin },
+                    set: { newValue in
+                        do {
+                            if newValue { try SMAppService.mainApp.register() } else { try SMAppService.mainApp.unregister() }
+                        } catch {}
+                        launchAtLogin = SMAppService.mainApp.status == .enabled
+                    }
+                ))
+                Toggle("Banner before meetings", isOn: $bannerEnabled)
+            }
             .toggleStyle(.checkbox)
             .font(.caption)
-            Spacer()
-            Button("Open Calendar") {
-                open(URL(fileURLWithPath: "/System/Applications/Calendar.app"))
+            HStack(spacing: 10) {
+                Spacer()
+                Button("Open Calendar") {
+                    open(URL(fileURLWithPath: "/System/Applications/Calendar.app"))
+                }
+                Button("Quit") { NSApplication.shared.terminate(nil) }
             }
-            Button("Quit") { NSApplication.shared.terminate(nil) }
+            .buttonStyle(FooterLinkStyle())
+            .font(.caption)
         }
-        .buttonStyle(FooterLinkStyle())
-        .font(.caption)
     }
 }
 
@@ -270,7 +277,7 @@ private struct FooterLinkStyle: ButtonStyle {
     }
 }
 
-private struct JoinButtonStyle: ButtonStyle {
+struct JoinButtonStyle: ButtonStyle {
     @Environment(\.palette) private var palette
 
     func makeBody(configuration: Configuration) -> some View {
